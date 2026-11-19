@@ -1,5 +1,8 @@
 # 🦫 𝐁𝐎𝐓 𝐂𝐀𝐏𝐈𝐁𝐀𝐑𝐀 𝐒𝐏𝐀𝐌
 
+> 💾 ¿Vas a borrar Termux o cambiar de dispositivo? La sesión de WhatsApp
+> está respaldada en `sesion-whatsapp.tar.gz`. Sigue [RESTAURAR.md](RESTAURAR.md).
+
 > Sistema profesional de **gestión de campañas y anuncios** para WhatsApp.
 > TypeScript · Node.js · Baileys
 >
