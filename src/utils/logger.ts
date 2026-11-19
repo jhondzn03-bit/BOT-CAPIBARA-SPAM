@@ -34,6 +34,7 @@ const prettyStream = {
 export const logger = pino(
   {
     level: config.logLevel,
+    base: undefined,
     formatters: { level: (label) => ({ level: label.toUpperCase() }) },
     serializers: { err: pino.stdSerializers.err },
   },
