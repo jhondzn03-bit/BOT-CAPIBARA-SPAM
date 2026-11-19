@@ -1,0 +1,11 @@
+node_modules/
+dist/
+.env
+auth_info/
+auth_info_backup_*/
+codigo-vinculacion.txt
+storage/*.json
+storage/media/*
+*.log
+.DS_Store
+npm-debug.log*
