@@ -11,6 +11,12 @@ fi
 
 tar -xzf sesion-whatsapp.tar.gz
 
+# Estado (grupos autorizados, campañas y programaciones) si está disponible.
+if [ -f estado-backup.tar.gz ]; then
+  tar -xzf estado-backup.tar.gz
+  echo "✅ Estado restaurado en storage/db.json"
+fi
+
 if [ -f auth_info/creds.json ]; then
   echo "✅ Sesión restaurada en auth_info/"
   node -e "const c=require('./auth_info/creds.json');console.log('   Número:',c.me?.id,'| Nombre:',c.me?.name,'| Registrado:',c.registered)" 2>/dev/null || true

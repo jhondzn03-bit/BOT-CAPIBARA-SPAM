@@ -2,6 +2,8 @@
 
 El archivo `sesion-whatsapp.tar.gz` contiene la carpeta `auth_info/` con la
 sesión ya vinculada de `𝓢𝓹𝓪𝓶𝓮𝓻𝓑𝔂𝓙𝓱𝓸𝓷!` (`+1 332 228 4862`).
+El archivo `estado-backup.tar.gz` contiene `storage/db.json` con los grupos,
+la campaña y las programaciones. `bash restaurar-sesion.sh` restaura ambos.
 
 > ⚠️ **Este repo es PRIVADO.** El archivo contiene credenciales de WhatsApp.
 > **Nunca lo hagas público** ni compartas el token de GitHub. Si se filtra,
@@ -50,8 +52,14 @@ bash ver-codigo.sh
 
 ## Envío cada 3 minutos
 
-La campaña y los grupos están en `storage/db.json`, que **sí está excluido**
-del repo (`.gitignore`). Si al restaurar no aparecen, vuelve a crearlos:
+El estado se restaura desde `estado-backup.tar.gz`. Verifica con:
+
+```bash
+.spam estado
+.spam programados
+```
+
+Si por algún motivo no aparecen los grupos o la campaña, vuelve a crearlos:
 
 ```bash
 .spam autorizar todos
