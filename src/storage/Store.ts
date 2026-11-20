@@ -10,6 +10,7 @@ const DEFAULT_DATA: StoreData = {
   scheduled: [],
   audit: [],
   deliveries: {},
+  paused: false,
   settings: {
     sendDelayMs: config.limits.sendDelayMs,
     maxSendsPerGroupDay: config.limits.maxSendsPerGroupDay,
@@ -41,6 +42,7 @@ export class Store {
         scheduled: (parsed.scheduled ?? []).filter((s) => s.status !== 'cancelada'),
         audit: parsed.audit ?? [],
         deliveries: parsed.deliveries ?? {},
+        paused: parsed.paused ?? false,
         settings: { ...DEFAULT_DATA.settings, ...(parsed.settings ?? {}) },
       };
     } catch {
@@ -184,6 +186,17 @@ export class Store {
       }
     }
     return total;
+  }
+
+  // ------------------------------------------------------------ Pausa global
+  /** Interruptor que detiene TODOS los envíos a grupos. */
+  isPaused(): boolean {
+    return this.data.paused;
+  }
+
+  setPaused(paused: boolean): void {
+    this.data.paused = paused;
+    void this.save();
   }
 
   // --------------------------------------------------------------- Settings

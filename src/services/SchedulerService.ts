@@ -17,6 +17,9 @@ export function startScheduler(getSock: () => WASocket | undefined): NodeJS.Time
     tickRunning = true;
 
     try {
+      // Con los envíos detenidos no se consumen las programaciones: se retoman al reanudar.
+      if (store.isPaused()) return;
+
       const now = Date.now();
       const vistas = new Set<string>();
 

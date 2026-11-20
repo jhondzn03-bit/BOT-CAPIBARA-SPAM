@@ -153,9 +153,17 @@ Todos los comandos usan el prefijo `.spam` (configurable con `BOT_PREFIX`).
 | `.spam programados` | Ver campañas programadas |
 | `.spam cancelar <id>` | Cancelar una programación |
 | `.spam enviar <id>` | Enviar campaña a grupos autorizados |
+| `.spam detener` | 🛑 **Detener todos los envíos** (manuales y programados) |
+| `.spam reanudar` | ✅ Reanudar los envíos |
 | `.spam enviados [id]` | Ver cuántos mensajes envió el bot (total o por campaña) |
 | `.spam estado` | Estado del sistema |
 | `.spam auditoria` | Registro de auditoría |
+
+> 🛑 **Parar todo**: `.spam detener` frena al instante los envíos manuales y los
+> programados (incluso a mitad de una campaña). El estado se guarda, así que sigue
+> detenido aunque reinicies el bot. `.spam reanudar` lo vuelve a activar y las
+> programaciones pendientes se retoman sin haberse consumido. Solo lo puede usar
+> el `OWNER_NUMBER` (si lo configuraste).
 
 ### Flujo recomendado
 

@@ -126,6 +126,9 @@ export const generalCommands: Command[] = [
     usage: '.spam enviar <id|todos>',
     minArgs: 1,
     run: async (ctx) => {
+      if (store.isPaused()) {
+        return ctx.reply(`${E.warn} Los envíos están detenidos. Usa \`.spam reanudar\` primero.`);
+      }
       const key = ctx.args[0].toLowerCase();
       const campaign = ['todos', 'todo', 'all', 'ultima', 'última'].includes(key)
         ? campaigns.latest()
@@ -150,6 +153,44 @@ export const generalCommands: Command[] = [
     },
   },
   {
+    name: 'detener',
+    aliases: ['parar', 'pausa', 'stop', 'pause', 'apagar'],
+    category: 'general',
+    description: 'Detener TODOS los envíos a grupos (manuales y programados)',
+    usage: '.spam detener',
+    ownerOnly: true,
+    run: async (ctx) => {
+      if (store.isPaused()) {
+        return ctx.reply(`${E.warn} Los envíos ya están detenidos. Usa \`.spam reanudar\` para activarlos.`);
+      }
+      store.setPaused(true);
+      store.audit('envios.detener', 'Envíos detenidos globalmente', ctx.sender);
+      await ctx.react(E.check);
+      await ctx.reply(
+        `${E.check} 🛑 *Todos los envíos detenidos.*\n\n` +
+          `No se enviará ningún mensaje a grupos (ni manual ni programado).\n` +
+          `Para volver a enviar: \`.spam reanudar\`.`,
+      );
+    },
+  },
+  {
+    name: 'reanudar',
+    aliases: ['resume', 'continuar', 'activar', 'play', 'encender'],
+    category: 'general',
+    description: 'Reanudar los envíos a grupos',
+    usage: '.spam reanudar',
+    ownerOnly: true,
+    run: async (ctx) => {
+      if (!store.isPaused()) {
+        return ctx.reply(`${E.warn} Los envíos ya están activos. Para detenerlos: \`.spam detener\`.`);
+      }
+      store.setPaused(false);
+      store.audit('envios.reanudar', 'Envíos reanudados', ctx.sender);
+      await ctx.react(E.check);
+      await ctx.reply(`${E.check} ✅ *Envíos reanudados.* Las programaciones se retoman en el próximo tick.`);
+    },
+  },
+  {
     name: 'estado',
     aliases: ['status', 'info'],
     category: 'general',
@@ -170,6 +211,9 @@ export const generalCommands: Command[] = [
           `╰━━━━━━━━━━━━━━━━━━━━━━╯`,
           '',
           `${E.capibara} ${THEME.name} v${THEME.version}`,
+          store.isPaused()
+            ? `🛑 Envíos: *DETENIDOS* (\`.spam reanudar\`)`
+            : `✅ Envíos: activos (\`.spam detener\`)`,
           `${E.pin} Grupos: ${all.length} · Autorizados: ${authorized.length}`,
           `${E.mail} Campañas: ${store.listCampaigns().length}`,
           `⏱️ Retardo entre envíos: ${s.sendDelayMs} ms`,

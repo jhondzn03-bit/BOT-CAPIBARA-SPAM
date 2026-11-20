@@ -84,6 +84,8 @@ export function helpMenu(): string {
     `▸ ${P} cancelar <id>          Cancelar programación`,
     `▸ ${P} campanas               Listar campañas`,
     `▸ ${P} enviar <id>             Enviar a grupos autorizados`,
+    `▸ ${P} detener                Detener TODOS los envíos`,
+    `▸ ${P} reanudar               Volver a enviar`,
     `▸ ${P} enviados [id]          Contar mensajes enviados`,
     `▸ ${P} estado                 Estado del sistema`,
     `▸ ${P} ayuda                  Este menú`,

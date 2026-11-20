@@ -91,6 +91,8 @@ export interface StoreData {
   };
   /** Último envío por campaña y grupo: `${campaignId}:${groupId}` -> timestamp. */
   deliveries: Record<string, number>;
+  /** Interruptor global: true = no se envía ningún mensaje a grupos. */
+  paused: boolean;
 }
 
 /** Contexto pasado a cada comando. */

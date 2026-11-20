@@ -31,6 +31,11 @@ function humanMs(ms: number): string {
 export async function broadcast(sock: WASocket, campaign: Campaign): Promise<BroadcastResult> {
   const result: BroadcastResult = { sent: 0, failed: 0, skipped: [], sentGroups: [] };
 
+  if (store.isPaused()) {
+    logger.warn('Envío omitido: envíos detenidos globalmente');
+    return result;
+  }
+
   if (sending) {
     result.skipped.push('ya hay otro envío en curso (omitido para evitar duplicados)');
     logger.warn('Envío concurrente omitido');
@@ -83,6 +88,15 @@ export async function broadcast(sock: WASocket, campaign: Campaign): Promise<Bro
     );
 
     for (const group of eligible) {
+      // Si detienen el bot a mitad de campaña, no se envía nada más.
+      if (store.isPaused()) {
+        result.skipped.push(`${group.name}: envíos detenidos`);
+        for (const rest of eligible.slice(eligible.indexOf(group) + 1)) {
+          result.skipped.push(`${rest.name}: envíos detenidos`);
+        }
+        logger.warn('Envío interrumpido: envíos detenidos globalmente');
+        break;
+      }
       try {
         await sock.sendMessage(group.id, payload as never);
         // Se marca ANTES del sleep para que otro tick no vuelva a enviarlo.
