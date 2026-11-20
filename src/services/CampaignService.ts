@@ -47,6 +47,7 @@ export class CampaignService {
     campaign.status = 'enviada';
     campaign.sentAt = Date.now();
     campaign.sentCount = count;
+    campaign.totalSent = (campaign.totalSent ?? store.countAuditSends(id)) + count;
     campaign.updatedAt = Date.now();
     store.upsertCampaign(campaign);
     store.audit('campana.send', `${campaign.id} enviada a ${count} grupos`, 'sistema');

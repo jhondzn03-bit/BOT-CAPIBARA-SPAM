@@ -9,12 +9,14 @@ const DEFAULT_DATA: StoreData = {
   campaigns: {},
   scheduled: [],
   audit: [],
+  deliveries: {},
   settings: {
     sendDelayMs: config.limits.sendDelayMs,
     maxSendsPerGroupDay: config.limits.maxSendsPerGroupDay,
     maxGroupsPerCampaign: config.limits.maxGroupsPerCampaign,
     requireAuthorization: config.limits.requireAuthorization,
     autoRead: config.limits.autoRead,
+    groupCooldownMs: config.limits.groupCooldownMs,
   },
 };
 
@@ -36,8 +38,9 @@ export class Store {
         ...parsed,
         groups: parsed.groups ?? {},
         campaigns: parsed.campaigns ?? {},
-        scheduled: parsed.scheduled ?? [],
+        scheduled: (parsed.scheduled ?? []).filter((s) => s.status !== 'cancelada'),
         audit: parsed.audit ?? [],
+        deliveries: parsed.deliveries ?? {},
         settings: { ...DEFAULT_DATA.settings, ...(parsed.settings ?? {}) },
       };
     } catch {
@@ -66,8 +69,37 @@ export class Store {
   removeGroup(id: string): boolean {
     const existed = Boolean(this.data.groups[id]);
     delete this.data.groups[id];
+    for (const key of Object.keys(this.data.deliveries)) {
+      if (key.endsWith(`:${id}`)) delete this.data.deliveries[key];
+    }
     if (existed) void this.save();
     return existed;
+  }
+
+  // ------------------------------------------------------------ Deliveries
+  private deliveryKey(campaignId: string, groupId: string): string {
+    return `${campaignId}:${groupId}`;
+  }
+
+  /** Momento en que esa campaña fue enviada por última vez a ese grupo. */
+  lastDelivery(campaignId: string, groupId: string): number | undefined {
+    return this.data.deliveries[this.deliveryKey(campaignId, groupId)];
+  }
+
+  /** Registra un envío para evitar duplicados durante el periodo de enfriamiento. */
+  markDelivered(campaignId: string, groupId: string, at = Date.now()): void {
+    this.data.deliveries[this.deliveryKey(campaignId, groupId)] = at;
+    void this.save();
+  }
+
+  /** Borra el historial de envíos (de una campaña o de todas) para permitir reenvío. */
+  clearDeliveries(campaignId?: string): number {
+    const keys = Object.keys(this.data.deliveries).filter((k) =>
+      campaignId ? k.startsWith(`${campaignId}:`) : true,
+    );
+    for (const key of keys) delete this.data.deliveries[key];
+    if (keys.length) void this.save();
+    return keys.length;
   }
 
   // ------------------------------------------------------------- Campaigns
@@ -89,13 +121,16 @@ export class Store {
     const campaign = this.getCampaign(id);
     if (!campaign) return false;
     delete this.data.campaigns[campaign.id];
+    this.clearDeliveries(campaign.id);
     void this.save();
     return true;
   }
 
   // ------------------------------------------------------------- Scheduled
   listScheduled(): ScheduledCampaign[] {
-    return this.data.scheduled.sort((a, b) => a.executeAt - b.executeAt);
+    return this.data.scheduled
+      .filter((s) => s.status !== 'cancelada')
+      .sort((a, b) => a.executeAt - b.executeAt);
   }
 
   upsertScheduled(item: ScheduledCampaign): void {
@@ -103,6 +138,15 @@ export class Store {
     if (index >= 0) this.data.scheduled[index] = item;
     else this.data.scheduled.push(item);
     void this.save();
+  }
+
+  /** Elimina la programación de la lista (canceladas no se conservan). */
+  removeScheduled(id: string): boolean {
+    const index = this.data.scheduled.findIndex((s) => s.id.toLowerCase() === id.toLowerCase());
+    if (index < 0) return false;
+    this.data.scheduled.splice(index, 1);
+    void this.save();
+    return true;
   }
 
   // ----------------------------------------------------------------- Audit
@@ -121,6 +165,25 @@ export class Store {
 
   listAudit(limit = 15): AuditEntry[] {
     return this.data.audit.slice(0, limit);
+  }
+
+  /**
+   * Total histórico de envíos de una campaña según la auditoría.
+   * Se usa como respaldo para campañas creadas antes de existir `totalSent`.
+   */
+  countAuditSends(campaignId: string): number {
+    const manual = `${campaignId} enviada a `;
+    const automatic = `${campaignId} enviada automáticamente (`;
+    let total = 0;
+    for (const entry of this.data.audit) {
+      if (entry.action !== 'campana.send' && entry.action !== 'campana.programada') continue;
+      if (entry.detail.startsWith(manual)) {
+        total += Number.parseInt(entry.detail.slice(manual.length), 10) || 0;
+      } else if (entry.detail.startsWith(automatic)) {
+        total += Number.parseInt(entry.detail.slice(automatic.length), 10) || 0;
+      }
+    }
+    return total;
   }
 
   // --------------------------------------------------------------- Settings

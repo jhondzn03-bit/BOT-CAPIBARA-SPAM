@@ -58,7 +58,10 @@ export interface Campaign {
   createdAt: number;
   updatedAt: number;
   sentAt?: number;
+  /** Mensajes enviados en el último envío. */
   sentCount?: number;
+  /** Total acumulado de mensajes enviados por esta campaña. */
+  totalSent?: number;
 }
 
 /** Entrada del registro de auditoría. */
@@ -83,7 +86,11 @@ export interface StoreData {
     requireAuthorization: boolean;
     /** Marcar automáticamente como leídos los mensajes que llegan. */
     autoRead: boolean;
+    /** Tiempo mínimo (ms) entre envíos de UNA MISMA campaña a UN MISMO grupo. 0 = sin control. */
+    groupCooldownMs: number;
   };
+  /** Último envío por campaña y grupo: `${campaignId}:${groupId}` -> timestamp. */
+  deliveries: Record<string, number>;
 }
 
 /** Contexto pasado a cada comando. */

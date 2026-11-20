@@ -108,7 +108,7 @@ async function connect(state: AuthState, saveCreds: SaveCreds, version: [number,
     browser: Browsers.ubuntu('Chrome'),
     syncFullHistory: false,
     markOnlineOnConnect: true,
-    generateHighQualityLinkPreview: false,
+    generateHighQualityLinkPreview: true,
     getMessage: async () => undefined,
   });
 

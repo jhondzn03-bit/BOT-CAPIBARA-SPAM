@@ -28,6 +28,8 @@ export const config = {
   pairingStandard: process.env.PAIRING_STANDARD === '1',
   browserName: process.env.BOT_BROWSER_NAME?.trim() || 'Capibara',
   ownerNumber: cleanPhone(process.env.OWNER_NUMBER),
+  /** Número que recibe el comprobante (imagen) de cada envío. */
+  proofNumber: cleanPhone(process.env.PROOF_NUMBER),
   paths: {
     auth: path.join(root, 'auth_info'),
     dataDir: path.join(root, 'storage'),
@@ -40,6 +42,8 @@ export const config = {
     maxGroupsPerCampaign: int(process.env.MAX_GROUPS_PER_CAMPAIGN, 20),
     requireAuthorization: (process.env.REQUIRE_GROUP_AUTHORIZATION ?? 'true').toLowerCase() !== 'false',
     autoRead: (process.env.AUTO_READ ?? 'true').toLowerCase() !== 'false',
+    /** Evita enviar la misma campaña al mismo grupo antes de este tiempo. */
+    groupCooldownMs: Math.max(0, int(process.env.GROUP_COOLDOWN_MS, 120_000)),
   },
   logLevel: process.env.LOG_LEVEL?.trim() || 'info',
 } as const;

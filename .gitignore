@@ -9,3 +9,7 @@ storage/media/*
 *.log
 .DS_Store
 npm-debug.log*
+
+# Respaldos locales con credenciales (nunca subir)
+sesion-whatsapp.tar.gz
+estado-backup.tar.gz

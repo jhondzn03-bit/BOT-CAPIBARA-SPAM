@@ -166,10 +166,10 @@ export const programacionCommands: Command[] = [
       const id = ctx.args[0];
       const item = store.listScheduled().find((s) => s.id.toLowerCase() === id.toLowerCase() || s.campaignId.toLowerCase() === id.toLowerCase());
       if (!item) return ctx.reply(`${E.cross} No encontré esa programación.`);
-      item.status = 'cancelada';
-      store.upsertScheduled(item);
-      store.audit('cancelar', `Programación ${item.id} cancelada`, 'sistema');
-      await ctx.reply(`${E.check} Programación \`${item.id}\` cancelada.`);
+      store.removeScheduled(item.id);
+      store.audit('cancelar', `Programación ${item.id} cancelada y eliminada`, 'sistema');
+      await ctx.react(E.check);
+      await ctx.reply(`${E.check} Programación \`${item.id}\` cancelada y borrada de la lista.`);
     },
   },
   {
