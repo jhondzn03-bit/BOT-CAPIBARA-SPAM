@@ -1,10 +1,12 @@
+import fs from 'node:fs';
+import path from 'node:path';
 import type { WAMessage, WASocket } from '@whiskeysockets/baileys';
 import { findCommand } from '../commands';
 import { config } from '../config';
 import { THEME } from '../config/theme';
 import { store } from '../storage/Store';
 import type { CommandContext } from '../types';
-import { digits, messageText, senderJid } from '../utils/helpers';
+import { messageText, senderJid } from '../utils/helpers';
 import { globalLimiter } from '../utils/rateLimiter';
 import { logger } from '../utils/logger';
 
@@ -22,7 +24,7 @@ export class Handler {
     if (!jid) return;
 
     const sender = msg.key.participant ?? msg.key.remoteJid ?? jid;
-    const isOwner = this.isOwner(sender);
+    const isOwner = this.isOwner(sender, msg);
 
     // Límite global por usuario (10 comandos por minuto).
     if (!globalLimiter.check(`cmd:${sender}`, 10, 60_000)) {
@@ -45,6 +47,10 @@ export class Handler {
     }
 
     if (command.ownerOnly && !isOwner) {
+      logger.warn(
+        { sender, jid, participant: msg.key.participant, owner: config.ownerNumber },
+        'Comando de owner rechazado',
+      );
       await this.reply(msg, `${E.lock} Este comando es solo para el propietario.`);
       return;
     }
@@ -86,9 +92,30 @@ export class Handler {
     }
   }
 
-  private isOwner(sender: string): boolean {
+  /**
+   * Acepta al owner aunque WhatsApp envíe un @lid en vez del número, o un JID
+   * con sufijo de dispositivo (503...:2@s.whatsapp.net).
+   */
+  private isOwner(sender: string, msg: WAMessage): boolean {
     if (!config.ownerNumber) return true;
-    return digits(sender) === config.ownerNumber;
+    const jids = [sender, msg.key.remoteJid ?? '', msg.key.participant ?? ''];
+
+    for (const jid of jids) {
+      if (!jid) continue;
+      const base = jid.split('@')[0].split(':')[0];
+      if (base === config.ownerNumber) return true;
+      if (!jid.includes('@lid')) continue;
+      try {
+        const mapping = fs.readFileSync(
+          path.join(config.paths.auth, `lid-mapping-${base}_reverse.json`),
+          'utf8',
+        );
+        if (mapping.replace(/[^\d]/g, '') === config.ownerNumber) return true;
+      } catch {
+        // Sin mapeo inverso: se prueba el siguiente identificador.
+      }
+    }
+    return false;
   }
 
   private async reply(msg: WAMessage, text: string): Promise<void> {
