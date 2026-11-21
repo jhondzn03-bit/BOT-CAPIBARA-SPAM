@@ -144,7 +144,8 @@ Todos los comandos usan el prefijo `.spam` (configurable con `BOT_PREFIX`).
 
 | Comando | Descripción |
 |---|---|
-| `.spam` / `.spam ayuda` | Menú principal y centro de ayuda |
+| `.spam` / `.spam ayuda` | Menú principal (un solo mensaje) |
+| `.spam comandos` | Lista completa de comandos |
 | `.spam campanas` | Listar campañas |
 | `.spam programar <id> <+2h>` | Programar envío automático |
 | `.spam repetir <id\|todos> 3m` | **Enviar cada 3 minutos** (recurrente) |

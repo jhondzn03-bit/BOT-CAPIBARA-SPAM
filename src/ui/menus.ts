@@ -35,7 +35,7 @@ export function mainMenu(totalGroups: number, authorized: number, totalCampaigns
     `┃  ${E.gear} ${toBold('ACCIONES')}`,
     `┃   ▸ ${P} campanas   ▸ ${P} enviar <id>`,
     `┃   ▸ ${P} enviados   ▸ ${P} estado`,
-    `┃   ▸ ${P} ayuda      ▸ ${P} estado`,
+    `┃   ▸ ${P} ayuda      ▸ ${P} comandos`,
     `╰${LINE}╯`,
     '',
     `${E.water} ${toItalic('usa con responsabilidad y consentimiento')}`,

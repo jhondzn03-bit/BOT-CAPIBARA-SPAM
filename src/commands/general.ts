@@ -40,12 +40,20 @@ export const generalCommands: Command[] = [
     usage: '.spam',
     run: async (ctx) => {
       const all = store.listGroups();
-      await ctx.reply(
-        helpMenu(),
-      );
+      // Un solo mensaje: antes se enviaban dos menús completos seguidos.
       await ctx.reply(
         mainMenu(all.length, all.filter((g) => g.status === 'autorizado').length, store.listCampaigns().length),
       );
+    },
+  },
+  {
+    name: 'comandos',
+    aliases: ['cmd', 'lista', 'listacomandos'],
+    category: 'general',
+    description: 'Lista completa de comandos',
+    usage: '.spam comandos',
+    run: async (ctx) => {
+      await ctx.reply(helpMenu());
     },
   },
   {
